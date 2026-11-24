@@ -1,49 +1,48 @@
-# NEON RUSH · 霓虹狂飙
+# NEON RUSH｜霓虹狂飙
 
-> 一款 3D 霓虹风无尽狂飙游戏。Godot 4.7 引擎打造，**全部场景、模型、音效均为程序化生成**——仓库里没有一张图片、没有一个音频文件，所有视觉与听觉都是代码实时合成的。
+一款以三车道躲避与跳跃为核心的 3D 霓虹无尽跑酷游戏：在不断加速的道路上闪避障碍、收集能量，尽可能刷新得分。
 
-![游戏截图](qa/qa_2.png)
+![NEON RUSH 游戏画面：霓虹道路、游戏 HUD 与前方障碍](qa/qa_2.png)
 
-## 玩法
+## 游戏玩法
 
-- **←/→ 或 A/D**：三车道切换
-- **SPACE / W / ↑**：跳跃（可跳过低栏，低栏上方常有能量奖励）
-- **R**：结束后重开
-- 躲开红色路障、收集青色能量方块（+30 分）、贴近路障擦过有 **"贴脸 +15"** 奖励
-- 速度随时间不断攀升（127 → 378 km/h），看你能撑多远
+- 使用 **← / →** 或 **A / D** 在三条车道间移动。
+- 使用 **空格 / W / ↑** 跳跃。
+- 避开道路上的障碍物，并收集能量方块；收集会增加分数。
+- 游戏结束后，按 **R**、**空格**、**Enter** 或点击画面重新开始。
+- 游戏显示当前分数、最高分与速度；最高分保存在本地 Godot 用户数据中。
 
-## 特性
+## 画面与交互
 
-- **零素材**：玩家飞船、霓虹道路、拱门、落日、城市天际线全部由 GDScript 运行时构建；BGM 是一段程序合成的 112 BPM synthwave 循环，音效（拾取/跳跃/变道/撞毁）全部 WebAudio 式数字合成，由 `tools/gen_audio.py` 生成 WAV
-- **Godot 4.7 Forward+ 渲染**：Bloom 辉光、雾、ACES 色调映射、MSAA
-- **手感细节**：变道侧倾、速度镜头 FOV 拉伸、撞击慢动作 + 屏幕震动、贴脸奖励飘字
-- **单文件发行**：`build/NEON-RUSH.exe`（约 110MB，PCK 内嵌，双击即玩）
+场景以 GDScript 在运行时构建，呈现发光道路、几何障碍与霓虹色调。游戏包含随速度变化的镜头视野、变道倾斜、跳跃和碰撞反馈，以及 HUD 分数与速度信息。仓库内的 `qa/qa_0.png` 至 `qa/qa_3.png` 是现有游戏画面，可用于查看不同状态。
+
+音频素材位于 `assets/`，包括循环背景音乐及拾取、跳跃、变道和碰撞音效；`tools/gen_audio.py` 提供对应的 WAV 合成脚本。
+
+## 技术栈
+
+- Godot Engine 4.7，GDScript
+- 3D 场景与游戏逻辑：`main.gd`；主场景：`main.tscn`
+- Godot 工程配置与运行入口：`project.godot`
+- 音频素材：`assets/*.wav`；生成脚本：`tools/gen_audio.py`
 
 ## 本地运行
 
+需要安装 **Godot 4.7**。在仓库根目录运行：
+
 ```bash
-# 编辑器运行（需 Godot 4.7+）
 godot --path .
-
-# 导出 Windows 单文件 exe
-godot --headless --path . --export-release "Windows" build/NEON-RUSH.exe
 ```
 
-## 技术结构
+项目配置将 `main.tscn` 设为主场景。仓库包含名为 `Windows` 的 Windows Desktop 导出预设（见 `export_presets.cfg`）；实际导出还需要可用的 Godot 导出模板。
 
+## 项目文件
+
+```text
+main.gd             游戏逻辑、运行时场景与界面
+main.tscn           主场景
+project.godot       Godot 项目配置
+assets/             背景音乐与游戏音效
+qa/                 已有游戏画面
+tools/gen_audio.py 音频 WAV 合成脚本
+export_presets.cfg  Windows Desktop 导出预设
 ```
-main.gd            全部游戏逻辑与场景构建（约 700 行）
-main.tscn          入口场景（仅挂 main.gd）
-project.godot      Godot 4.7 工程配置
-assets/*.wav       程序化生成的音频（构建产物，可由 tools/gen_audio.py 重新生成）
-tools/gen_audio.py 音频合成器（纯 Python 标准库）
-export_presets.cfg Windows 导出预设
-```
-
-## 设计说明
-
-- 撞击判定为逻辑判定（车道距离 + 高度窗口），不依赖物理引擎，稳定且可预测
-- 障碍生成保证**永远留一条活路**；双障碍时活路频道会刷能量线引导走位
-- 拱门接近相机时自动隐藏，避免穿模糊屏
-- 最高分持久化在 `user://neonrush.dat`
-- 预留 `assets/player.glb` 接口：放入文件即自动替换程序化飞船（可用于 Blender 建模升级）
